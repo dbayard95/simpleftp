@@ -22,6 +22,8 @@
 #define MSG_299 "299 File %s size %ld bytes\r\n"
 #define MSG_226 "226 Transfer complete\r\n"
 
+#define FINPUERTO 65535
+
 /**
  * function: receive the commands from the client
  * sd: socket descriptor
@@ -190,6 +192,26 @@ void operate(int sd) {
 int main (int argc, char *argv[]) {
 
     // arguments checking
+
+	int i, cont_puerto;
+
+	if (argc!=2){	//se comprueba si se recibe la cantidad de argumentos indicados
+	   printf("Ingrese un numero de puerto\n");
+	   exit(1);
+	}
+	else{
+	   for(i = 0; i < strlen(argv[1]);i++){	//se toma el primer argumento recibido y analiza caracter por caracter si es un numero o no
+	       cont_puerto = argv[1][i]-48;
+	       if(cont_puerto < 0 || cont_puerto >9){
+	          printf("Puerto ingresado no valido\n");
+            	  exit(1);
+               }
+	   }
+	}
+        if ((atoi(argv[1])<0)||(atoi(argv[1])>FINPUERTO)){	//se analiza si el puerto esta dentro del rango adecuado (0-65535)
+		printf("Ingrese un puerto valido\n");
+		exit(1);
+	}
 
     // reserve sockets and variables space
 
