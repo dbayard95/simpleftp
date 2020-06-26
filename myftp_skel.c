@@ -58,7 +58,7 @@ void send_msg(int sd, char *operation, char *param) {
         sprintf(buffer, "%s\r\n", operation);
 
     // send command and check for errors
-    if (send(sd, res, strlen(res) + 1, 0)<0){
+    if (send(sd, buffer, strlen(buffer) + 1, 0)<0){
 	warn("Error al enviar comando\n");
     }
 
@@ -128,9 +128,12 @@ void get(int sd, char *file_name) {
     FILE *file;
 
     // send the RETR command to the server
-
+    send_msg(sd, "RETR", NULL);
     // check for the response
-
+    if(!recv_msg(sd,299,buffer)){
+	warn(buffer);
+	return;
+    }
     // parsing the file size from the answer received
     // "File %s size %ld bytes"
     sscanf(buffer, "File %*s size %d bytes", &f_size);
@@ -146,6 +149,7 @@ void get(int sd, char *file_name) {
     fclose(file);
 
     // receive the OK from the server
+    recv_msg(sd, 226, NULL);
 
 }
 
@@ -155,9 +159,9 @@ void get(int sd, char *file_name) {
  **/
 void quit(int sd) {
     // send command QUIT to the client
-
+    send_msg(sd, "QUIT", NULL);
     // receive the answer from the server
-
+    recv_msg(sd, 221, NULL);
 }
 
 /**
@@ -252,7 +256,7 @@ int main (int argc, char *argv[]) {
 
     // if receive hello proceed with authenticate and operate if not warning
 
-	if recv_msg(sd, 220, NULL){
+	if (recv_msg(sd, 220, NULL)){
            authenticate(sd);
 	   operate(sd);	
 	}

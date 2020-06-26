@@ -42,7 +42,7 @@ bool recv_cmd(int sd, char *operation, char *param) {
 
     // receive the command in the buffer and check for errors
 
-
+    
 
     // expunge the terminator characters from the buffer
     buffer[strcspn(buffer, "\r\n")] = 0;
@@ -84,7 +84,13 @@ bool send_ans(int sd, char *message, ...){
     va_end(args);
     // send answer preformated and check errors
 
-
+    if(send(sd, buffer, strlen(buffer),0)>0){
+	return true;
+    }
+    else{
+	warn("Error\n");
+	return false;
+    }
 
 
 }
@@ -243,23 +249,42 @@ int main (int argc, char *argv[]) {
 	}
 
     // reserve sockets and variables space
+    int msd, ssd;
+    struct sockaddr_in maddr, saddr;
+    socklen_t saddr_len = sizeof(saddr);
 
     // create server socket and check errors
+    msd= socket(AF_INET, SOCK_STREAM, 0);
+    if(msd<0){
+	warn("Errror");
+    }
     
     // bind master socket and check errors
+    maddr.sin_family = AF_INET;
+    maddr.sin_addr.s_addr = INADDR_ANY;
+    maddr.sin_port = htons(atoi(argv[1]));
 
+    if(bind(msd, (struct sockaddr *) &maddr, sizeof(maddr))<0){
+	errx(1,"Error");
+    }	
     // make it listen
-
+	listen(msd, 5);
+    
     // main loop
     while (true) {
         // accept connectiones sequentially and check errors
+	if((ssd = accept(msd,(struct sockaddr *) &saddr, &saddr_len))<0){
+	    errx(1, "Error");
+	}
 
         // send hello
-
+	send_ans(ssd, MSG_220);
         // operate only if authenticate is true
     }
 
     // close server socket
+    close(ssd);
+    close(msd);
 
     return 0;
 }
