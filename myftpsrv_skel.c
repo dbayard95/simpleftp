@@ -42,7 +42,7 @@ bool recv_cmd(int sd, char *operation, char *param) {
 
     // receive the command in the buffer and check for errors
 
-    if (recv_s = recv(sd, buffer, BUFSIZE,0)<0){
+    if ((recv_s = recv(sd, buffer, BUFSIZE,0))<0){
 	warn("Error al recibir\n");
 	return false;
     }
